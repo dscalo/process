@@ -2,33 +2,54 @@ package com.company;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Main {
-
-
     public static void main(String[] args) {
 
-        ArrayList<Process> processes = new ArrayList<>();
-
-        processes.addAll(createProcesses());
-
+        /* SETUP */
         Random random = new Random();
+        ArrayList<Process> processes = new ArrayList<>();
+        final boolean[] shutdown = {false};
 
-        int numberToTerminate = random.nextInt(processes.size());
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("Stopping Loop");
+                shutdown[0] = true;
+            }
+        };
 
-        System.out.println("Terminating " + numberToTerminate + " processes");
+        Timer timer = new Timer("KillProcesses");
 
-        for (int j = 0; j < numberToTerminate; j++) {
-            int terminate = random.nextInt(processes.size());
+        timer.schedule(task, 3000);
 
-            Process p = processes.get(terminate);
-            System.out.println("Terminating process # " + p.getId());
-            p.shutdown();
-            processes.remove(terminate);
+        /* PROCESS LOOP */
+        while(!shutdown[0]) {
+            processes.addAll(createProcesses());
+            int numberToTerminate = random.nextInt(processes.size());
+
+            System.out.println("Terminating " + numberToTerminate + " processes");
+
+            for (int j = 0; j < numberToTerminate; j++) {
+                int terminate = random.nextInt(processes.size());
+
+                Process p = processes.get(terminate);
+                System.out.println("Terminating process # " + p.getId());
+                p.shutdown();
+                processes.remove(terminate);
+            }
         }
+
+        /* CLEANUP */
+        System.out.println("SHUTTING DOWN PROGRAM!!!!");
 
         // shutdown any processes still running
         processes.forEach(( p) -> p.shutdown());
+
+        System.out.println("EXITING, have a nice day!");
+        System.exit(1);
     }
 
     public static ArrayList<Process> createProcesses() {
