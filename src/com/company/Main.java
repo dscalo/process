@@ -6,13 +6,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Main {
+
+
     public static void main(String[] args) {
+        RAM ram = new RAM(100);
 
         /* SETUP */
         Random random = new Random();
         ArrayList<Process> processes = new ArrayList<>();
         final boolean[] shutdown = {false};
 
+        // TODO: remove the time code
+        // TODO: increas the number of processes
+        // TODO: add a random size to the process
+       // TODO: use the round robin to pluck a process from the array and add it to ram
+        // TODO: somehow delete a process???
         TimerTask task = new TimerTask() {
             @Override
             public void run() {

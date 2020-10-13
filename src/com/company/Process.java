@@ -7,9 +7,15 @@ public class Process extends Thread {
    private StringBuilder state;
    private int threads;
    private boolean terminate = false;
+   private int size = 0;
 
 
    public Process() {
+       this.threads = 1;
+   }
+
+   public Process(int size) {
+       this.size = size;
        this.threads = 1;
    }
 
@@ -21,6 +27,8 @@ public class Process extends Thread {
        System.out.println("Process " + this.getId() + " shutting down");
        this.terminate = true;
    }
+
+   public int getSize() {return this.size;}
 
 
     @Override
