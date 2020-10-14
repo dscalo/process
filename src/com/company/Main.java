@@ -10,51 +10,56 @@ public class Main {
 
     public static void main(String[] args) {
         RAM ram = new RAM(100);
+        int quantum = 2;
 
         /* SETUP */
-        Random random = new Random();
         ArrayList<Process> processes = new ArrayList<>();
+        processes = createProcesses();
         final boolean[] shutdown = {false};
 
-        // TODO: remove the time code
-        // TODO: increas the number of processes
-        // TODO: add a random size to the process
        // TODO: use the round robin to pluck a process from the array and add it to ram
         // TODO: somehow delete a process???
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println("Stopping Loop");
-                shutdown[0] = true;
+        boolean done = false;
+        System.out.println("STARTINH ROUND ROBIN");
+
+        while(!done) {
+            for (int i = 0; i < processes.size(); i++) {
+                // look at process
+                Process p = processes.get(i);
+                if ( p.getBurstTime() <= 0) {
+                    done = true;
+                    continue;
+                }
+                if (p.getRAM() == -1) {
+                    System.out.println(("Adding process " + p.getId() + " to RAM"));
+                    if(!ram.add(p)) {
+                        System.out.println(("MEMORY FULL!! skipping process"));
+                        continue;
+                    }
+                }
+
+                // is it done?
+                p.decrementBurstTime(quantum);
+                System.out.println("Process " + p.getId() + " burst time is " + p.getBurstTime());
+                if (p.getBurstTime() <= 0) {
+                    System.out.println("Process " + p.getId() + " finished running");
+                    done = true;
+
+                    if (p.getRAM() != -1) {
+                        System.out.println("Removing process " + p.getId() + " from RAM");
+                        ram.deleteProcess(p.getId());
+                    }
+                } else {
+                    done = false;
+                    System.out.println(("Process " + p.getId() + " working!"));
+
+                }
             }
-        };
 
-        Timer timer = new Timer("KillProcesses");
-
-        timer.schedule(task, 3000);
-
-        /* PROCESS LOOP */
-        while(!shutdown[0]) {
-            processes.addAll(createProcesses());
-            int numberToTerminate = random.nextInt(processes.size());
-
-            System.out.println("Terminating " + numberToTerminate + " processes");
-
-            for (int j = 0; j < numberToTerminate; j++) {
-                int terminate = random.nextInt(processes.size());
-
-                Process p = processes.get(terminate);
-                System.out.println("Terminating process # " + p.getId());
-                p.shutdown();
-                processes.remove(terminate);
-            }
         }
 
-        /* CLEANUP */
-        System.out.println("SHUTTING DOWN PROGRAM!!!!");
-
         // shutdown any processes still running
-        processes.forEach(( p) -> p.shutdown());
+
 
         System.out.println("EXITING, have a nice day!");
         System.exit(1);
@@ -63,13 +68,15 @@ public class Main {
     public static ArrayList<Process> createProcesses() {
         ArrayList<Process> processes = new ArrayList<>();
         Random random = new Random();
-        int numbOfProcesses = random.nextInt(5) + 1;
+        int numbOfProcesses = random.nextInt(10) + 1;
 
         for (int i = 0; i < numbOfProcesses; i++) {
-            Process p = new Process();
-            System.out.println("Creating process " + p.getId());
-            p.setThreads(random.nextInt(5) + 1);
-            p.start();
+            int size = random.nextInt(10) + 1;
+            int burstTime = random.nextInt(20) + 4;
+            Process p = new Process(size, burstTime);
+            System.out.println("Creating process " + p.getId() + " with a size of " + size + " and a burst time of " + burstTime);
+//            p.setThreads(random.nextInt(5) + 1);
+//            p.start();
             processes.add(p);
         }
 

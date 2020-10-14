@@ -39,6 +39,7 @@ public class RAM {
         for(int j = 0; j < size; j++) {
             blocks[j + offset] = p.getId();
         }
+        p.setRam(offset);
         return true;
 
     }
